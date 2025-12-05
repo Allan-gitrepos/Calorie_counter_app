@@ -1,7 +1,8 @@
-// Onboarding Module - With copy-paste link for API key
+// Onboarding Module - With default API key and multiple options
 const Onboarding = {
     currentStep: 1,
     userData: {},
+    defaultApiKey: 'AIzaSyDoO9mAClXQGcWy8GMgqKTprlSthf5pwVI',
 
     init() {
         UI.hideLoading();
@@ -105,32 +106,52 @@ const Onboarding = {
 
             <!-- Step 4: API Key -->
             <div id="step-4" class="onboarding-step hidden">
-                <h2 style="margin-bottom: 8px;">Connect AI</h2>
-                <p class="text-muted" style="margin-bottom: 24px;">Get your free Gemini API key.</p>
+                <h2 style="margin-bottom: 8px;">AI Setup</h2>
+                <p class="text-muted" style="margin-bottom: 20px;">Choose how to connect to AI.</p>
                 
-                <!-- Step-by-step guide with copy link -->
+                <!-- Default API Key Option -->
+                <div class="card" style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border: 2px solid #4CAF50; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <span style="font-size: 1.5rem;">⚡</span>
+                        <div>
+                            <h4 style="color: #2E7D32; margin: 0;">Quick Start (Recommended)</h4>
+                            <p style="font-size: 0.75rem; color: #558B2F; margin: 0;">Use default key - limited daily usage</p>
+                        </div>
+                    </div>
+                    <button onclick="Onboarding.useDefaultKey()" class="btn btn-primary" style="background: #4CAF50; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);">
+                        ✓ Use Default Key (Start Now)
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div style="text-align: center; margin: 20px 0; color: #9A9A9A; font-size: 0.875rem;">
+                    — OR get your own unlimited key —
+                </div>
+
+                <!-- Custom API Key Guide -->
                 <div class="card" style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border: none; margin-bottom: 20px;">
-                    <h4 style="color: #1565C0; margin-bottom: 16px;">📋 How to Get Your API Key</h4>
+                    <h4 style="color: #1565C0; margin-bottom: 16px;">🔑 Get Your Own Free API Key</h4>
                     
-                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-                        <p style="font-weight: 600; margin-bottom: 8px;">1. Copy this link:</p>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <input type="text" id="api-link" value="${apiLink}" readonly 
-                                style="font-size: 12px; padding: 10px; background: #F5F5F7; flex: 1;">
-                            <button onclick="Onboarding.copyLink()" class="btn btn-primary" 
-                                style="padding: 10px 16px; white-space: nowrap; width: auto;">
-                                📋 Copy
+                    <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                        <p style="font-weight: 600; margin-bottom: 12px;">Open in browser:</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button onclick="Onboarding.openLink()" class="btn btn-secondary" 
+                                style="flex: 1; min-width: 120px; padding: 10px;">
+                                🌐 Open Link
+                            </button>
+                            <button onclick="Onboarding.copyLink()" class="btn btn-secondary" 
+                                style="flex: 1; min-width: 120px; padding: 10px;">
+                                📋 Copy Link
                             </button>
                         </div>
-                        <p style="font-size: 0.75rem; color: #6A6A6A; margin-top: 8px;">
-                            Paste in your browser (Chrome) where you're logged into Google
-                        </p>
+                        <input type="text" id="api-link" value="${apiLink}" readonly 
+                            style="font-size: 11px; padding: 8px; background: #F5F5F7; margin-top: 10px; text-align: center;">
                     </div>
                     
-                    <div style="font-size: 0.9rem; color: #1565C0;">
-                        <p style="margin-bottom: 6px;"><strong>2.</strong> Sign in with Google</p>
-                        <p style="margin-bottom: 6px;"><strong>3.</strong> Click "Create API Key"</p>
-                        <p><strong>4.</strong> Copy and paste the key below</p>
+                    <div style="font-size: 0.85rem; color: #1565C0;">
+                        <p style="margin-bottom: 4px;">1. Sign in with Google</p>
+                        <p style="margin-bottom: 4px;">2. Click "Create API Key"</p>
+                        <p>3. Paste your key below</p>
                     </div>
                 </div>
 
@@ -144,18 +165,40 @@ const Onboarding = {
                 </div>
 
                 <div class="form-group">
-                    <label>Paste Your API Key</label>
+                    <label>Your API Key <span style="font-weight: 400; color: #9A9A9A;">(or use default above)</span></label>
                     <div class="api-input-wrapper">
                         <input type="password" id="api-key" placeholder="AIza..." oninput="Onboarding.validateStep4()">
                         <button type="button" class="btn-icon" onclick="Onboarding.toggleApiKey()" style="flex-shrink: 0;">👁️</button>
                     </div>
                 </div>
 
-                <button id="btn-step-4" class="btn btn-primary" disabled onclick="Onboarding.complete()">
-                    Start Tracking 🚀
+                <button id="btn-step-4" class="btn btn-primary" disabled onclick="Onboarding.complete()" style="background: #1976D2;">
+                    Use My Key & Start 🚀
                 </button>
             </div>
         </div>`;
+    },
+
+    useDefaultKey() {
+        // Use the default API key
+        this.userData.dailyCalories = Storage.calculateTDEE(this.userData);
+
+        Storage.saveUser(this.userData);
+        Storage.saveApiKey(this.defaultApiKey);
+        Storage.saveModel('gemini-2.0-flash');
+        Storage.setOnboarded(true);
+
+        UI.showToast('Quick start enabled! 🎉', 'success');
+
+        setTimeout(() => {
+            App.showDashboard();
+        }, 500);
+    },
+
+    openLink() {
+        const url = 'https://aistudio.google.com/app/apikey';
+        window.open(url, '_blank');
+        UI.showToast('Opening in browser...', 'success');
     },
 
     copyLink() {
@@ -165,13 +208,12 @@ const Onboarding = {
 
         try {
             document.execCommand('copy');
-            UI.showToast('Link copied! Paste in your browser', 'success');
+            UI.showToast('Link copied! Paste in Chrome', 'success');
         } catch (err) {
-            // Fallback
             navigator.clipboard.writeText(input.value).then(() => {
                 UI.showToast('Link copied!', 'success');
             }).catch(() => {
-                UI.showToast('Please copy the link manually', 'error');
+                UI.showToast('Please copy manually', 'error');
             });
         }
     },
