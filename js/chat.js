@@ -69,7 +69,16 @@ const Chat = {
                 <div class="chat-bubble ai">
                     <p><strong>Hi! I'm FitCalo AI 👋</strong></p>
                     <p class="text-sm text-muted" style="margin-top: 8px;">
-                        Snap a photo 📸 or tell me what you ate!
+                        Snap a photo 📸 or tell me what you ate/workout!
+                        <br>
+                        <br>
+                        <strong>Example:</strong>
+                        <br>
+                        I ate 2 slices of pizza
+                        <br>
+                        I ran 2 km
+                        <br>
+                        I walked for 2 hrs
                     </p>
                 </div>
             </main>
