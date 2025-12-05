@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <!-- Mobile Viewport - Critical for APK -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- PWA & Mobile App Meta Tags -->
+    <meta name="theme-color" content="#FF5A00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FitCalo">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="FitCalo">
+
+    <!-- Disable phone number detection -->
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- MS Tile for Windows -->
+    <meta name="msapplication-TileColor" content="#FF5A00">
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <!-- SEO -->
+    <meta name="description" content="FitCalo - AI-powered calorie counter. Track your meals with photos and chat.">
+
+    <title>FitCalo - AI Calorie Counter</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Prevent text selection on mobile (app-like feel) -->
+    <style>
+        /* Prevent pull-to-refresh on mobile */
+        html,
+        body {
+            overscroll-behavior-y: contain;
+        }
+
+        /* iOS safe areas */
+        body {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+
+        /* Prevent text selection for UI elements */
+        button,
+        .card,
+        .nav-item,
+        .btn {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Allow text selection in inputs */
+        input,
+        textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        /* Fix iOS input zoom */
+        input,
+        select,
+        textarea {
+            font-size: 16px !important;
+        }
+
+        /* Smooth momentum scrolling */
+        * {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Loading Screen -->
+        <div class="loading-screen">
+            <div class="loader"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts - Order matters! -->
+    <script src="js/storage.js"></script>
+    <script src="js/gemini.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/onboarding.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        // Register Service Worker for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW failed', err));
+        }
+
+        // Prevent default touch behaviors that cause issues in APK
+        document.addEventListener('touchmove', function (e) {
+            // Allow scrolling in scrollable areas
+            if (e.target.closest('#chat-messages, main, .modal-content')) {
+                return;
+            }
+        }, { passive: true });
+
+        // Handle back button for Android
+        window.addEventListener('popstate', function (e) {
+            const chatScreen = document.getElementById('chat-screen');
+            const settingsModal = document.getElementById('settings-modal');
+
+            if (chatScreen) {
+                e.preventDefault();
+                Chat.close();
+            } else if (settingsModal) {
+                e.preventDefault();
+                App.hideSettings();
+            }
+        });
+
+        // Add state for back button handling
+        if (window.history && window.history.pushState) {
+            window.history.pushState({}, '');
+        }
+    </script>
+</body>
+
+</html>
