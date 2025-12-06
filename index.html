@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
     <!-- PWA & Mobile App Meta Tags -->
-    <meta name="theme-color" content="#FF5A00">
+    <meta name="theme-color" content="#FF6B35">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="FitCalo">
@@ -20,15 +20,25 @@
     <meta name="format-detection" content="telephone=no">
 
     <!-- MS Tile for Windows -->
-    <meta name="msapplication-TileColor" content="#FF5A00">
+    <meta name="msapplication-TileColor" content="#FF6B35">
     <meta name="msapplication-tap-highlight" content="no">
 
-    <!-- SEO -->
-    <meta name="description" content="FitCalo - AI-powered calorie counter. Track your meals with photos and chat.">
+    <!-- SEO Meta Tags -->
+    <meta name="description"
+        content="FitCalo - Your AI-powered nutrition assistant. Track calories effortlessly with photos and chat. Get instant macro breakdowns powered by Google Gemini AI.">
+    <meta name="keywords"
+        content="calorie counter, nutrition tracker, AI food recognition, macro tracking, diet app, fitness app">
+    <meta name="author" content="FitCalo">
 
-    <title>FitCalo - AI Calorie Counter</title>
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FitCalo - AI Calorie Counter">
+    <meta property="og:description" content="Track calories effortlessly with AI-powered photo recognition and chat.">
+    <meta property="og:image" content="icons/icon-512.png">
 
-    <!-- Fonts -->
+    <title>FitCalo - AI Calorie Counter | Track Nutrition with Photos</title>
+
+    <!-- Fonts - Inter for premium look -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -44,12 +54,13 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
-    <!-- Prevent text selection on mobile (app-like feel) -->
+    <!-- Critical Mobile Styles -->
     <style>
         /* Prevent pull-to-refresh on mobile */
         html,
         body {
             overscroll-behavior-y: contain;
+            overflow-x: hidden;
         }
 
         /* iOS safe areas */
@@ -60,10 +71,12 @@
         /* Prevent text selection for UI elements */
         button,
         .card,
-        .nav-item,
-        .btn {
+        .tab-item,
+        .btn,
+        .nav-item {
             -webkit-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
         }
 
         /* Allow text selection in inputs */
@@ -90,6 +103,28 @@
             width: 0;
             height: 0;
         }
+
+        /* Prevent tap highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Loading animation */
+        @keyframes loadingPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .loading-text {
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
     </style>
 </head>
 
@@ -97,7 +132,25 @@
     <div id="app">
         <!-- Loading Screen -->
         <div class="loading-screen">
-            <div class="loader"></div>
+            <div style="text-align: center;">
+                <div style="
+                    width: 72px; 
+                    height: 72px; 
+                    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); 
+                    border-radius: 20px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    margin: 0 auto 24px;
+                    box-shadow: 0 8px 24px rgba(255, 107, 53, 0.32);
+                ">
+                    <span style="font-size: 2.25rem;">🥗</span>
+                </div>
+                <div class="loader"></div>
+                <p class="loading-text"
+                    style="margin-top: 16px; font-size: 0.875rem; color: #8585A0; font-weight: 500;">Loading FitCalo...
+                </p>
+            </div>
         </div>
     </div>
 
@@ -125,7 +178,7 @@
         // Prevent default touch behaviors that cause issues in APK
         document.addEventListener('touchmove', function (e) {
             // Allow scrolling in scrollable areas
-            if (e.target.closest('#chat-messages, main, .modal-content')) {
+            if (e.target.closest('#chat-messages, main, .modal-content, .tab-content')) {
                 return;
             }
         }, { passive: true });
@@ -133,14 +186,15 @@
         // Handle back button for Android
         window.addEventListener('popstate', function (e) {
             const chatScreen = document.getElementById('chat-screen');
-            const settingsModal = document.getElementById('settings-modal');
 
             if (chatScreen) {
                 e.preventDefault();
                 Chat.close();
-            } else if (settingsModal) {
+            } else if (Dashboard && Dashboard.currentTab !== 'home') {
                 e.preventDefault();
-                App.hideSettings();
+                Dashboard.currentTab = 'home';
+                Dashboard.update();
+                history.pushState({ app: true }, '');
             }
         });
 
@@ -148,6 +202,14 @@
         if (window.history && window.history.pushState) {
             window.history.pushState({}, '');
         }
+
+        // Theme persistence on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTheme = localStorage.getItem('fitcalo_theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+        });
     </script>
 </body>
 
